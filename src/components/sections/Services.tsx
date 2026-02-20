@@ -12,21 +12,21 @@ const services = [
         icon: Search,
         title: "University Selection",
         description:
-            "We evaluate your academic profile and match you with the right universities in your chosen European country — balancing your career goals with admission feasibility.",
+            "We evaluate your academic profile and match you with the right universities in your chosen European country  balancing your career goals with admission feasibility.",
         step: "01",
     },
     {
         icon: FileText,
         title: "Application Assistance",
         description:
-            "From crafting a compelling Statement of Purpose to organizing transcripts and recommendation letters, we handle your application with precision.",
+            "From crafting a compelling Statement of Purpose to organizing documents and recommendation letters, we handle your application with precision.",
         step: "02",
     },
     {
         icon: MessageSquare,
         title: "Visa Counselling",
         description:
-            "We guide you through the entire student visa process — documentation, embassy appointments, and interview preparation — with one of the highest success rates in Nepal.",
+            "We guide you through the entire student visa process from  documentation, embassy appointments to interview preparation. We have one of the highest success rates in Nepal.",
         step: "03",
     },
     {
@@ -47,7 +47,7 @@ const services = [
         icon: Plane,
         title: "Pre-Departure Briefing",
         description:
-            "Before you fly, we prepare you — accommodation tips, local culture, banking, SIM cards, and connecting you with our alumni network in your destination city.",
+            "Before you fly, we prepare you with accommodation tips, local culture, banking, SIM cards, and connecting you with our alumni network in your destination city.",
         step: "06",
     },
 ];
@@ -76,7 +76,16 @@ export default function Services() {
                             className="relative p-6 border border-gray-100 rounded-xl hover:border-[#2196C4]/20 hover:shadow-md transition-all duration-300 group bg-white"
                         >
                             {/* Step number */}
-                            <span className="absolute top-4 right-4 text-4xl font-black text-[#f5a623]/10 leading-none select-none">
+                            <span className="absolute top-4 right-4 text-4xl font-black leading-none select-none transition-all duration-300
+                                text-transparent
+                                [-webkit-text-stroke:2px_#f5a623]
+                                opacity-20
+                                group-hover:opacity-100
+                                group-hover:scale-110
+                                group-hover:[-webkit-text-stroke:px_#f5a623]
+                               
+                                origin-top-right
+                            ">
                                 {s.step}
                             </span>
 

@@ -7,12 +7,12 @@ const contactDetails = [
     {
         icon: MapPin,
         label: "Address",
-        lines: ["Kupondole, Lalitpur", "Nepal — 44700"],
+        lines: ["Kupondole, Lalitpur", "Nepal, 44700"],
     },
     {
         icon: Phone,
         label: "Phone",
-        lines: ["01-5400745", "985-1401745", "+977 985-1422745"],
+        lines: ["01-5400745", "+977 9851401745", "+977 9851422745"],
     },
     {
         icon: Mail,
@@ -23,7 +23,7 @@ const contactDetails = [
     {
         icon: Clock,
         label: "Office Hours",
-        lines: ["Sun – Fri: 9:00 AM – 6:00 PM", "Saturday: 10:00 AM – 3:00 PM"],
+        lines: ["Sun to Fri: 9:00 AM to 6:00 PM", "Saturday: 10:00 AM to 3:00 PM"],
     },
 ];
 
@@ -100,7 +100,7 @@ export default function Contact() {
                         {/* Map placeholder */}
                         <div className="mt-4 rounded-xl overflow-hidden border border-gray-100 h-44">
                             <iframe
-                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3533.0!2d85.316!3d27.689!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb19e!2sKupondole!5e0!3m2!1sen!2snp!4v1"
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14131.923768579076!2d85.29898965541994!3d27.68698389999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb190038f17727%3A0xa476f49673d209fa!2sEurolink%20Education%20Consultancy!5e0!3m2!1sen!2snp!4v1771567858012!5m2!1sen!2snp"
                                 width="100%"
                                 height="100%"
                                 style={{ border: 0 }}

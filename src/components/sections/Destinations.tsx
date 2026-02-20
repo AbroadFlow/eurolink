@@ -28,7 +28,7 @@ const destinations = [
         description:
             "Malta's English-speaking environment, EU membership, and sunny climate create an ideal study destination. Small country, big opportunities.",
         highlights: ["English-speaking nation", "EU member state", "Safe & welcoming", "Tourism & Hospitality"],
-        color: "#CF142B",
+        color: "#28afd8",
         accentColor: "#CF142B",
     },
     {
@@ -106,13 +106,13 @@ export default function Destinations() {
                                     ))}
                                 </ul>
 
-                                <a
+                                {/* <a
                                     href="#contact"
                                     className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#2196C4] hover:text-[#f5a623] transition-colors group/link"
                                 >
                                     Learn more
                                     <ArrowRight size={14} className="group-hover/link:translate-x-1 transition-transform" />
-                                </a>
+                                </a> */}
                             </div>
                         </div>
                     ))}

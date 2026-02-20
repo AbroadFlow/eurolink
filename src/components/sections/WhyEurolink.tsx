@@ -11,7 +11,7 @@ const reasons = [
         icon: HeartHandshake,
         title: "Honest Guidance",
         description:
-            "We recommend what's right for you — not what's easy for us. Transparent advice, zero hidden fees.",
+            "We recommend what's right for you  not what's easy for us. Transparent advice, zero hidden fees.",
     },
     {
         icon: Clock,
@@ -64,7 +64,7 @@ export default function WhyEurolink() {
                         </p>
                         <div className="flex items-center gap-4 p-4 bg-white rounded-xl border border-[#f5a623]/20">
                             <div className="w-12 h-12 rounded-full bg-[#f5a623]/10 flex items-center justify-center flex-shrink-0">
-                                <span className="text-2xl font-bold text-[#f5a623]">10+</span>
+                                <span className="text-2xl font-bold text-[#f5a623]">5+</span>
                             </div>
                             <div>
                                 <p className="font-semibold text-[#1a1a2e]">Years of Experience</p>

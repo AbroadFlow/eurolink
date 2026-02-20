@@ -1,10 +1,10 @@
 import { ArrowRight, GraduationCap, Globe, Users } from "lucide-react";
 
 const stats = [
-    { value: "500+", label: "Students Placed" },
-    { value: "5", label: "Countries" },
+    { value: "500+", label: "Students" },
+    { value: "6+", label: "Countries" },
     { value: "98%", label: "Visa Success Rate" },
-    { value: "10+", label: "Years Experience" },
+    { value: "5+", label: "Years Experience" },
 ];
 
 export default function Hero() {
@@ -39,8 +39,7 @@ export default function Hero() {
 
                         <p className="text-[#4b5563] text-lg leading-relaxed mb-8 max-w-lg">
                             We connect ambitious Nepali students with world-class universities
-                            across Europe. From application to arrival — we guide you every
-                            step of the way.
+                            across Europe, guiding in each and every step to fulfill your dream of studying in Europe.
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-3 mb-12">
@@ -84,30 +83,70 @@ export default function Hero() {
                                         <GraduationCap size={40} className="text-[#2196C4]" />
                                     </div>
                                     <p className="text-sm font-semibold text-[#1a1a2e]">Study in Europe</p>
-                                    <p className="text-xs text-[#6b7280]">5 Countries Available</p>
+                                    <p className="text-xs text-[#6b7280]">6 Countries Available</p>
                                 </div>
                             </div>
 
                             {/* Floating destination badges */}
                             {[
-                                { label: "Italy", emoji: "🇮🇹", pos: "top-4 left-4" },
-                                { label: "Georgia", emoji: "🇬🇪", pos: "top-4 right-4" },
-                                { label: "Malta", emoji: "🇲🇹", pos: "bottom-4 left-4" },
-                                { label: "Cyprus", emoji: "🇨🇾", pos: "bottom-4 right-4" },
-                                { label: "Netherlands", emoji: "🇳🇱", pos: "top-1/2 -right-4 -translate-y-1/2" },
+                                {
+                                    label: "Italy",
+                                    pos: "top-4 left-4",
+                                    flag: "https://flagcdn.com/w80/it.png",
+                                    delay: "0s",
+                                },
+                                {
+                                    label: "Georgia",
+                                    pos: "top-4 right-4",
+                                    flag: "https://flagcdn.com/w80/ge.png",
+                                    delay: "0.5s",
+                                },
+                                {
+                                    label: "Austria",
+                                    pos: "top-40 -left-8",
+                                    flag: "https://flagcdn.com/w80/at.png",
+                                    delay: "0s",
+                                },
+                                {
+                                    label: "Malta",
+                                    pos: "bottom-4 left-4",
+                                    flag: "https://flagcdn.com/w80/mt.png",
+                                    delay: "1s",
+                                },
+                                {
+                                    label: "Cyprus",
+                                    pos: "bottom-4 right-4",
+                                    flag: "https://flagcdn.com/w80/cy.png",
+                                    delay: "1.5s",
+                                },
+                                {
+                                    label: "Netherlands",
+                                    pos: "top-1/2 -right-4 -translate-y-1/2",
+                                    flag: "https://flagcdn.com/w80/nl.png",
+                                    delay: "2s",
+                                },
                             ].map((d) => (
                                 <div
                                     key={d.label}
-                                    className={`absolute ${d.pos} bg-white rounded-lg shadow-md px-3 py-2 flex items-center gap-1.5 border border-gray-100`}
+                                    className={`absolute ${d.pos} bg-white rounded-xl shadow-md p-1.5 border border-gray-100`}
+                                    style={{
+                                        animation: `floatBadge 3s ease-in-out infinite`,
+                                        animationDelay: d.delay,
+                                    }}
                                 >
-                                    <span className="text-lg">{d.emoji}</span>
-                                    <span className="text-xs font-semibold text-[#1a1a2e]">{d.label}</span>
+                                    <img
+                                        src={d.flag}
+                                        alt={d.label}
+                                        className="w-12 h-8 rounded-md object-cover shadow-sm"
+                                        title={d.label}
+                                    />
                                 </div>
                             ))}
+
                         </div>
 
                         {/* Floating card */}
-                        <div className="absolute -bottom-2 left-0 bg-white rounded-xl shadow-lg p-4 border border-gray-100 flex items-center gap-3 max-w-[200px]">
+                        {/* <div className="absolute bottom-26 left-0 bg-white rounded-xl shadow-lg p-4 border border-gray-100 flex items-center gap-3 max-w-[200px]">
                             <div className="w-9 h-9 rounded-full bg-[#f5a623]/10 flex items-center justify-center flex-shrink-0">
                                 <Users size={16} className="text-[#f5a623]" />
                             </div>
@@ -115,7 +154,7 @@ export default function Hero() {
                                 <p className="text-xs text-[#6b7280]">Students helped</p>
                                 <p className="text-sm font-bold text-[#1a1a2e]">500+ this year</p>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
             </div>

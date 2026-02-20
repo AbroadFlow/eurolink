@@ -34,12 +34,11 @@ export default function Footer() {
                             className="h-12 w-auto object-contain mb-4 "
                         />
                         <p className="text-[#94a3b8] text-sm leading-relaxed mb-5">
-                            Connecting Nepali students with world-class universities across
-                            Europe. Honest guidance. Proven results.
+                            Your Gateway to European Education
                         </p>
                         <div className="flex items-center gap-3">
                             <a
-                                href="#"
+                                href="https://www.facebook.com/people/Eurolink-Education-Consultancy/61575918413509/"
                                 className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#f5a623] flex items-center justify-center transition-colors"
                                 aria-label="Facebook"
                             >
@@ -52,13 +51,7 @@ export default function Footer() {
                             >
                                 <Instagram size={15} />
                             </a>
-                            <a
-                                href="#"
-                                className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#f5a623] flex items-center justify-center transition-colors"
-                                aria-label="YouTube"
-                            >
-                                <Youtube size={15} />
-                            </a>
+
                         </div>
                     </div>
 
@@ -109,15 +102,15 @@ export default function Footer() {
                             <li className="flex items-start gap-2.5">
                                 <MapPin size={14} className="text-[#f5a623] mt-0.5 flex-shrink-0" />
                                 <span className="text-[#94a3b8] text-sm">
-                                    Kupondole, Lalitpur<br />Nepal — 44700
+                                    Kupondole, Lalitpur<br />Nepal, 44700
                                 </span>
                             </li>
                             <li className="flex items-start gap-2.5">
                                 <Phone size={14} className="text-[#f5a623] mt-0.5 flex-shrink-0" />
                                 <div className="text-[#94a3b8] text-sm">
                                     <a href="tel:015400745" className="block hover:text-white transition-colors">01-5400745</a>
-                                    <a href="tel:9851401745" className="block hover:text-white transition-colors">985-1401745</a>
-                                    <a href="tel:+9779851422745" className="block hover:text-white transition-colors">+977 985-1422745</a>
+                                    <a href="tel:9851401745" className="block hover:text-white transition-colors">+977 9851401745</a>
+                                    <a href="tel:+9779851422745" className="block hover:text-white transition-colors">+977 9851422745</a>
                                 </div>
                             </li>
                             <li className="flex items-start gap-2.5">
