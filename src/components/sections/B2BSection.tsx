@@ -105,9 +105,9 @@ export default function B2BPartners() {
                         {/* Left Content */}
                         <div className="flex-1 text-center md:text-left">
                             <h3 className="text-2xl md:text-4xl font-extrabold tracking-tight text-white mb-4">
-                                Become Our Official <span className="text-blue-200">B2B Partner</span>
+                                Become Our Official <span className="text-orange-200">B2B Partner</span>
                             </h3>
-                            <p className="text-blue-50/90 text-base md:text-lg leading-relaxed max-w-xl">
+                            <p className="text-blue-50 text-base md:text-lg leading-relaxed max-w-xl">
                                 Ready to scale? Join our network of esteemed partners and unlock exclusive opportunities in the education sector.
                             </p>
 
