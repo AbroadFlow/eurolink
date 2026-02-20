@@ -55,11 +55,11 @@ export default function WhyEurolink() {
                         <p className="text-[#4b5563] leading-relaxed mb-8">
                             Choosing the right consultancy can define your entire study-abroad
                             experience. At Eurolink, we believe education abroad should be
-                            accessible, well-guided, and life-changing — not overwhelming.
+                            accessible, well-guided, and life-changing not overwhelming.
                         </p>
                         <p className="text-[#4b5563] leading-relaxed mb-8">
                             We are not a one-size-fits-all agency. We take the time to understand
-                            your academic background, financial situation, and long-term goals —
+                            your academic background, financial situation, and long-term goals
                             then craft a roadmap built specifically for you.
                         </p>
                         <div className="flex items-center gap-4 p-4 bg-white rounded-xl border border-[#f5a623]/20">
