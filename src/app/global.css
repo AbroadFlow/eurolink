@@ -131,3 +131,22 @@ nextjs-portal {
 .animate-marquee {
     animation: marquee 30s linear infinite;
 }
+
+/* Destination Marquee */
+@keyframes dest-marquee {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.animate-dest-marquee {
+    animation: dest-marquee 35s linear infinite;
+}
+
+.animate-dest-marquee:hover {
+    animation-play-state: paused;
+}
