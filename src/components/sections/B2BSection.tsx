@@ -98,25 +98,48 @@ export default function B2BPartners() {
                     </div>
                 </div>
 
-                {/* CTA */}
-                <div className="bg-gradient-to-br from-[#2196C4] to-[#1a7da8] rounded-xl p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div>
-                        <h3 className="text-xl font-bold mb-2">
-                            Become Our Official B2B Partner
-                        </h3>
-                        <p className="text-white/80 text-sm max-w-xl">
-                            Expand your services, increase revenue, and let our experienced
-                            processing team handle everything from admissions to visas.
-                        </p>
-                    </div>
+                {/* CTA Container */}
+                <div className="bg-gradient-to-br from-[#2196C4] to-[#1a7da8] rounded-2xl p-1 shadow-2xl">
+                    <div className="bg-white/5 backdrop-blur-md rounded-[calc(1rem-4px)] p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-10">
 
-                    <a
-                        href="#contact"
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-[#f5a623] text-white text-sm font-semibold rounded hover:bg-[#e09410] transition-colors whitespace-nowrap"
-                    >
-                        Partner With Us
-                        <ArrowRight size={14} />
-                    </a>
+                        {/* Left Content */}
+                        <div className="flex-1 text-center md:text-left">
+                            <h3 className="text-2xl md:text-4xl font-extrabold tracking-tight text-white mb-4">
+                                Become Our Official <span className="text-blue-200">B2B Partner</span>
+                            </h3>
+                            <p className="text-blue-50/90 text-base md:text-lg leading-relaxed max-w-xl">
+                                Ready to scale? Join our network of esteemed partners and unlock exclusive opportunities in the education sector.
+                            </p>
+
+                            <div className="mt-8 flex flex-col md:flex-row items-center gap-3 text-sm">
+                                <span className="text-blue-100/60 uppercase tracking-widest font-medium">Mail Us Today:</span>
+                                <a
+                                    href="mailto:partners@eurolinkeducation.com.np"
+                                    className="text-white font-semibold hover:text-[#f5a623] transition-all flex items-center gap-2 border-b border-white/20 hover:border-[#f5a623] pb-0.5"
+                                >
+                                    partners@eurolinkeducation.com.np
+                                </a>
+                            </div>
+                        </div>
+
+                        {/* Right Action with Pulse Animation */}
+                        <div className="relative shrink-0">
+                            {/* The Pulse Effect */}
+                            <span className="absolute inset-0 rounded-lg bg-[#f5a623]  opacity-20 pointer-events-none"></span>
+
+                            <a
+                                href="#contact"
+                                className="inline-flex items-center gap-2 px-6 py-3 bg-[#f5a623] text-white text-sm font-semibold rounded hover:bg-[#e09410] transition-colors whitespace-nowrap"
+                            >
+                                Partner With Us
+                                <ArrowRight
+                                    size={20}
+                                    className="group-hover:translate-x-1.5 transition-transform duration-300"
+                                />
+                            </a>
+                        </div>
+
+                    </div>
                 </div>
             </div>
         </section>
