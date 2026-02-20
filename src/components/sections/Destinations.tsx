@@ -42,7 +42,7 @@ const destinations = [
             "IELTS/PTE Not Required",
             "Low GPA Accepted",
             "Affordable Tuition Fee",
-            "Fee after Visa",
+            "Pay Fee after Visa",
             "Gap Accepted",
             "Easy Processing",
             "Part-time Work Allowed",
@@ -56,8 +56,8 @@ const destinations = [
         description:
             "Cyprus combines European academic standards with an affordable, relaxed lifestyle.",
         highlights: [
-
             "Gap Accepted",
+            "IELTS 6.5 Required",
             "Low GPA Accepted",
             "Affordable Tuition Fee",
             "No Interview Necessary",
@@ -90,7 +90,7 @@ const destinations = [
             "Austria offers high-quality education in a culturally rich environment.",
         highlights: [
             "Free Education",
-            "With or Without IELTS option",
+            "IELTS 6.5 Required",
             "High Visa Success Rate",
             "English Taught Programs",
             "1 Year Post Study Visa",
