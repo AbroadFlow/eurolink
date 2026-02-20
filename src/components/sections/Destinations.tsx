@@ -57,7 +57,7 @@ const destinations = [
             "Cyprus combines European academic standards with an affordable, relaxed lifestyle.",
         highlights: [
             "Gap Accepted",
-            "IELTS 6.5 Required",
+            "IELTS Required",
             "Low GPA Accepted",
             "Affordable Tuition Fee",
             "No Interview Necessary",
@@ -75,6 +75,7 @@ const destinations = [
         highlights: [
             "Schollarhip upto 50%",
             "Dependent Allowed",
+            "IELTS Required (overall 6)",
             "100% Visa Success Rate",
             "1 Year Masters",
             "2 Year Post Study Visa",
