@@ -122,7 +122,7 @@ export default function B2BPartners() {
                             </div>
                         </div>
 
-                        {/* Right Action with Pulse Animation */}
+                        {/* Right Action  */}
                         <div className="relative shrink-0">
                             {/* The Pulse Effect */}
                             <span className="absolute inset-0 rounded-lg bg-[#f5a623]  opacity-20 pointer-events-none"></span>

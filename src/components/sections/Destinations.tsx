@@ -42,6 +42,7 @@ const destinations = [
             "IELTS/PTE Not Required",
             "Low GPA Accepted",
             "Affordable Tuition Fee",
+            "Fee after Visa",
             "Gap Accepted",
             "Easy Processing",
             "Part-time Work Allowed",
@@ -55,15 +56,15 @@ const destinations = [
         description:
             "Cyprus combines European academic standards with an affordable, relaxed lifestyle.",
         highlights: [
-            "Fee after Visa",
-            "With or Without IELTS option",
+
             "Gap Accepted",
             "Low GPA Accepted",
+            "Affordable Tuition Fee",
             "No Interview Necessary",
             "Part time Job Allowed",
-            "High Visa Success Rate",
+            "100% VisaSuccess Rate",
         ],
-        color: "#003087",
+        color: "#010202",
     },
     {
         country: "Netherlands",
@@ -74,7 +75,7 @@ const destinations = [
         highlights: [
             "Schollarhip upto 50%",
             "Dependent Allowed",
-            "95% Visa Success Rate",
+            "100% Visa Success Rate",
             "1 Year Masters",
             "2 Year Post Study Visa",
             "20 hrs/week Part Time Work Allowed"
