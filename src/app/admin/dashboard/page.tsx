@@ -223,20 +223,27 @@ export default function AdminDashboardPage() {
                 )}
 
                 {/* ── Stats ── */}
-                <div className="grid grid-cols-3 gap-4 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-8">
                     {[
                         { label: "Total", value: submissions.length, icon: Users, color: "#2196C4" },
                         { label: "Today", value: todayCount, icon: TrendingUp, color: "#f5a623" },
                         { label: "Countries", value: uniqueDests, icon: MapPin, color: "#10b981" },
                     ].map(({ label, value, icon: Icon, color }) => (
-                        <div key={label} className="bg-white rounded-sm border border-gray-100 p-5 shadow-sm">
-                            <div className="flex items-center justify-between mb-3">
+                        <div
+                            key={label}
+                            className="group bg-white rounded-lg border border-gray-100 p-5 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-default"
+                            style={{ borderBottom: `2px solid ${color}25` }}
+                        >
+                            <div className="flex items-center justify-between mb-3 ">
                                 <span className="text-xs font-medium text-[#9ca3af] uppercase tracking-wide">{label}</span>
-                                <div className="w-8 h-8 rounded-sm flex items-center justify-center" style={{ backgroundColor: `${color}15` }}>
-                                    <Icon size={15} style={{ color }} />
+                                <div
+                                    className="w-9 h-9 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+                                    style={{ backgroundColor: `${color}12` }}
+                                >
+                                    <Icon size={16} style={{ color }} />
                                 </div>
                             </div>
-                            <p className="text-3xl font-bold text-[#1a1a2e]">{value}</p>
+                            <p className="text-3xl font-bold text-[#1a1a2e] transition-colors duration-300 group-hover:text-[var(--stat-color)]" style={{ "--stat-color": color } as React.CSSProperties}>{value}</p>
                         </div>
                     ))}
                 </div>
