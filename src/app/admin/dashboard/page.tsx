@@ -2,11 +2,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import Image from "next/image";
 import {
     LogOut, RefreshCw, Search, Shield, Mail, Phone,
     MapPin, MessageSquare, Clock, Users, TrendingUp,
-    Eye, ChevronDown, X, Calendar,
-    ArrowUpRight,
+    Eye, ChevronDown, X, Calendar, ArrowUpRight,
+    Trash2, ChevronLeft, ChevronRight, AlertTriangle,
 } from "lucide-react";
 
 type Submission = {
@@ -19,7 +20,7 @@ type Submission = {
     created_at: string;
 };
 
-import Image from "next/image";
+const PAGE_SIZE = 5;
 
 export default function AdminDashboardPage() {
     const router = useRouter();
@@ -33,9 +34,12 @@ export default function AdminDashboardPage() {
     const [sortAsc, setSortAsc] = useState(false);
     const [userEmail, setUserEmail] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
-    const pageSize = 10;
 
-    // Auth guard
+    // Delete state
+    const [deleteId, setDeleteId] = useState<string | null>(null);   // which row is pending confirmation
+    const [deleting, setDeleting] = useState(false);
+
+    // Auth guard 
     useEffect(() => {
         supabase.auth.getSession().then(({ data }) => {
             if (!data.session) {
@@ -53,7 +57,7 @@ export default function AdminDashboardPage() {
         return () => subscription.unsubscribe();
     }, [router]);
 
-    // Fetch data
+    // Fetch 
     const fetchSubmissions = useCallback(async () => {
         setLoading(true);
         setFetchError("");
@@ -64,12 +68,10 @@ export default function AdminDashboardPage() {
             .order("created_at", { ascending: sortAsc });
 
         if (error) {
-            console.error("Supabase fetch error:", error);
-            // Common error codes to give actionable messages
             if (error.code === "42501" || error.message?.includes("permission")) {
-                setFetchError("Permission denied. Make sure your Supabase RLS policy allows authenticated users to SELECT from this table. See the setup instructions below.");
+                setFetchError("Permission denied. Check your Supabase RLS policy.");
             } else if (error.code === "42P01") {
-                setFetchError(`Table not found. Check that "contact_submissions" is the correct table name in your Supabase project.`);
+                setFetchError(`Table "contact_submissions" not found.`);
             } else {
                 setFetchError(`Error: ${error.message}`);
             }
@@ -84,14 +86,31 @@ export default function AdminDashboardPage() {
         if (authChecked) fetchSubmissions();
     }, [authChecked, fetchSubmissions]);
 
-    // Logout 
+    // Delete 
+    const handleDelete = async (id: string) => {
+        setDeleting(true);
+        const { error } = await supabase.from("contact_submissions").delete().eq("id", id);
+        if (error) {
+            alert(`Delete failed: ${error.message}`);
+        } else {
+            setSubmissions(prev => prev.filter(s => s.id !== id));
+            if (expandedId === id) setExpandedId(null);
+        }
+        setDeleteId(null);
+        setDeleting(false);
+    };
+
+    // Logout
     const handleLogout = async () => {
         await supabase.auth.signOut();
         router.replace("/admin/login");
     };
 
-    // Derived data 
-    const destinations = ["All", ...Array.from(new Set(submissions.map(s => s.destination).filter(Boolean)))];
+    // Derived 
+    const destinations = [
+        "All",
+        ...Array.from(new Set(submissions.map(s => s.destination).filter(Boolean))),
+    ];
 
     const filtered = submissions.filter(s => {
         const q = search.toLowerCase();
@@ -105,16 +124,18 @@ export default function AdminDashboardPage() {
         return matchSearch && matchDest;
     });
 
-    const totalPages = Math.ceil(filtered.length / pageSize);
-    const paginated = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+    const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+    const safePage = Math.min(currentPage, totalPages);
+    const paginated = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
     const todayCount = submissions.filter(
         s => new Date(s.created_at).toDateString() === new Date().toDateString()
     ).length;
-
     const uniqueDests = new Set(submissions.map(s => s.destination).filter(Boolean)).size;
 
-    // Loading state (auth check)
+    // Reset page when filters change
+    useEffect(() => { setCurrentPage(1); }, [search, destFilter, sortAsc]);
+
     if (!authChecked) {
         return (
             <div className="min-h-screen bg-[#f4f8fb] flex items-center justify-center">
@@ -123,23 +144,44 @@ export default function AdminDashboardPage() {
         );
     }
 
+    // Delete confirmation row 
+    const DeleteConfirmRow = ({ s }: { s: Submission }) => (
+        <div className="border-t border-red-100 bg-red-50 px-5 py-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 text-red-600">
+                <AlertTriangle size={15} className="flex-shrink-0" />
+                <p className="text-sm font-medium">
+                    Delete <span className="font-bold">{s.name}</span>? This cannot be undone.
+                </p>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+                <button
+                    onClick={() => setDeleteId(null)}
+                    disabled={deleting}
+                    className="px-3 py-1.5 text-xs font-semibold text-[#6b7280] bg-white border border-gray-200 rounded-sm hover:bg-gray-50 transition disabled:opacity-50"
+                >
+                    Cancel
+                </button>
+                <button
+                    onClick={() => handleDelete(s.id)}
+                    disabled={deleting}
+                    className="px-3 py-1.5 text-xs font-semibold text-white bg-red-500 rounded-sm hover:bg-red-600 transition disabled:opacity-50 flex items-center gap-1.5"
+                >
+                    {deleting ? <RefreshCw size={11} className="animate-spin" /> : <Trash2 size={11} />}
+                    {deleting ? "Deleting…" : "Yes, delete"}
+                </button>
+            </div>
+        </div>
+    );
+
     return (
         <div className="min-h-screen bg-[#f4f8fb]">
 
-            {/* ── Top nav ── */}
+            {/* ── Nav ── */}
             <header className="bg-white border-b border-gray-100 sticky top-0 z-20 shadow-sm">
-                <div className="max-w-7xl mx-auto px-4  md:px-6 h-14 flex items-center justify-between">
-                    <div className="flex  items-center gap-3">
-                        <div className="w-8 h-8  rounded-sm bg-[#2196C4]/10 flex items-center justify-center border border-[#2196C4]/15">
-                            <div className="w-8 h-8 rounded-sm bg-[#2196C4]/10 flex items-center justify-center border border-[#2196C4]/15 overflow-hidden">
-                                <Image
-                                    src="/eurolink_light.png"
-                                    alt="Eurolink"
-                                    width={24}
-                                    height={24}
-                                    className="w-6 h-6 object-contain"
-                                />
-                            </div>
+                <div className="max-w-7xl mx-auto px-4 md:px-6 h-14 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-sm bg-[#2196C4]/10 flex items-center justify-center border border-[#2196C4]/15 overflow-hidden">
+                            <Image src="/eurolink_light.png" alt="Eurolink" width={24} height={24} className="w-6 h-6 object-contain" />
                         </div>
                         <span className="font-bold text-[#1a1a2e] text-sm">Eurolink Admin</span>
                         <span className="hidden sm:block text-gray-200">·</span>
@@ -148,14 +190,14 @@ export default function AdminDashboardPage() {
                     <div className="flex items-center gap-2">
                         <button
                             onClick={fetchSubmissions}
-                            className="flex items-center gap-1.5 text-xs text-[#6b7280] hover:text-[#2196C4] transition px-3 py-1.5 rounded-lg hover:bg-[#2196C4]/5"
+                            className="flex items-center gap-1.5 text-xs text-[#6b7280] hover:text-[#2196C4] transition px-3 py-1.5 rounded-sm hover:bg-[#2196C4]/5"
                         >
                             <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
                             <span className="hidden sm:inline">Refresh</span>
                         </button>
                         <button
                             onClick={handleLogout}
-                            className="flex items-center gap-1.5 text-xs text-red-500 hover:text-red-600 transition px-3 py-1.5 rounded-lg hover:bg-red-50"
+                            className="flex items-center gap-1.5 text-xs text-red-500 hover:text-red-600 transition px-3 py-1.5 rounded-sm hover:bg-red-50"
                         >
                             <LogOut size={13} />
                             <span className="hidden sm:inline">Sign Out</span>
@@ -166,12 +208,19 @@ export default function AdminDashboardPage() {
 
             <main className="max-w-7xl mx-auto px-4 md:px-6 py-8">
 
-                {/* ── Page title ── */}
+                {/* ── Title ── */}
                 <div className="mb-8">
                     <h1 className="text-2xl font-bold text-[#1a1a2e]">Contact Submissions</h1>
                     <p className="text-[#9ca3af] text-sm mt-0.5">All inquiries from the website contact form</p>
                 </div>
 
+                {/* ── Error ── */}
+                {fetchError && (
+                    <div className="flex items-start gap-2 bg-red-50 border border-red-100 text-red-600 text-sm rounded-sm px-4 py-3 mb-6">
+                        <AlertTriangle size={15} className="flex-shrink-0 mt-0.5" />
+                        {fetchError}
+                    </div>
+                )}
 
                 {/* ── Stats ── */}
                 <div className="grid grid-cols-3 gap-4 mb-8">
@@ -183,10 +232,7 @@ export default function AdminDashboardPage() {
                         <div key={label} className="bg-white rounded-sm border border-gray-100 p-5 shadow-sm">
                             <div className="flex items-center justify-between mb-3">
                                 <span className="text-xs font-medium text-[#9ca3af] uppercase tracking-wide">{label}</span>
-                                <div
-                                    className="w-8 h-8 rounded-lg flex items-center justify-center"
-                                    style={{ backgroundColor: `${color}15` }}
-                                >
+                                <div className="w-8 h-8 rounded-sm flex items-center justify-center" style={{ backgroundColor: `${color}15` }}>
                                     <Icon size={15} style={{ color }} />
                                 </div>
                             </div>
@@ -197,7 +243,6 @@ export default function AdminDashboardPage() {
 
                 {/* ── Filters ── */}
                 <div className="flex flex-col sm:flex-row gap-3 mb-5">
-                    {/* Search */}
                     <div className="relative flex-1">
                         <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300" />
                         <input
@@ -214,7 +259,6 @@ export default function AdminDashboardPage() {
                         )}
                     </div>
 
-                    {/* Destination filter */}
                     <div className="relative">
                         <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
                         <select
@@ -223,16 +267,12 @@ export default function AdminDashboardPage() {
                             className="appearance-none bg-white border border-gray-200 rounded-sm pl-9 pr-8 py-2.5 text-xs font-semibold text-[#6b7280] focus:outline-none focus:border-[#2196C4] focus:ring-2 focus:ring-[#2196C4]/10 transition shadow-sm cursor-pointer hover:border-[#2196C4]/40 hover:text-[#2196C4]"
                         >
                             {destinations.map(d => (
-                                <option key={d} value={d}>
-                                    {d === "All" ? "All Countries" : d}
-                                </option>
+                                <option key={d} value={d}>{d === "All" ? "All Countries" : d}</option>
                             ))}
                         </select>
                         <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
                     </div>
 
-
-                    {/* Sort */}
                     <button
                         onClick={() => setSortAsc(v => !v)}
                         className="flex items-center gap-1.5 px-3 py-2 bg-white border border-gray-200 rounded-sm text-xs text-[#6b7280] hover:text-[#2196C4] hover:border-[#2196C4]/40 transition shadow-sm whitespace-nowrap"
@@ -245,14 +285,16 @@ export default function AdminDashboardPage() {
 
                 {/* Results count */}
                 <p className="text-[#9ca3af] text-xs mb-4">
-                    {loading ? "Loading…" : `${filtered.length} result${filtered.length !== 1 ? "s" : ""}${search || destFilter !== "All" ? " (filtered)" : ""}`}
+                    {loading
+                        ? "Loading…"
+                        : `${filtered.length} result${filtered.length !== 1 ? "s" : ""}${search || destFilter !== "All" ? " (filtered)" : ""}`}
                 </p>
 
-                {/* ── Submissions list ── */}
+                {/* ── List ── */}
                 {loading ? (
                     <div className="space-y-3">
                         {[...Array(5)].map((_, i) => (
-                            <div key={i} className="bg-white  border border-gray-100 h-[72px] animate-pulse shadow-sm" />
+                            <div key={i} className="bg-white border border-gray-100 h-[72px] animate-pulse shadow-sm" />
                         ))}
                     </div>
                 ) : filtered.length === 0 ? (
@@ -262,119 +304,196 @@ export default function AdminDashboardPage() {
                         {search && <p className="text-xs text-[#d1d5db] mt-1">Try clearing your search</p>}
                     </div>
                 ) : (
-                    <div className="space-y-2">
-                        {filtered.map(s => (
-                            <div
-                                key={s.id}
-                                className="bg-white border border-gray-100 rounded-sm overflow-hidden shadow-sm hover:border-[#2196C4]/25 hover:shadow-md transition-all duration-200"
-                            >
-                                {/* Collapsed row */}
-                                <button
-                                    onClick={() => setExpandedId(expandedId === s.id ? null : s.id)}
-                                    className="w-full flex items-center gap-4 px-5 py-4 text-left"
+                    <>
+                        <div className="space-y-2">
+                            {paginated.map(s => (
+                                <div
+                                    key={s.id}
+                                    className="bg-white border border-gray-100 rounded-sm overflow-hidden shadow-sm hover:border-[#2196C4]/25 hover:shadow-md transition-all duration-200"
                                 >
-                                    {/* Avatar */}
-                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#2196C4] to-[#1a7da8] flex items-center justify-center flex-shrink-0 text-sm font-bold text-white shadow-sm">
-                                        {s.name?.charAt(0).toUpperCase() ?? "?"}
-                                    </div>
-
-                                    <div className="flex-1 min-w-0 grid grid-cols-2 sm:grid-cols-4 gap-x-4">
-                                        {/* Name + phone */}
-                                        <div className="min-w-0">
-                                            <p className="text-sm font-semibold text-[#1a1a2e] truncate">{s.name}</p>
-                                            <p className="text-xs text-[#9ca3af] flex items-center gap-1 truncate mt-0.5">
-                                                <Phone size={9} />{s.phone}
-                                            </p>
-                                        </div>
-                                        {/* Email */}
-                                        <div className="hidden sm:flex flex-col items-center justify-center min-w-0">
-                                            <p className="text-xs text-[#6b7280] flex items-center gap-1 truncate">
-                                                <Mail size={9} />{s.email}
-                                            </p>
-                                        </div>
-                                        {/* Destination */}
-                                        <div className="flex items-center">
-                                            {s.destination ? (
-                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#f5a623]/10 text-[#f5a623] text-xs rounded-full border border-[#f5a623]/20 font-medium whitespace-nowrap">
-                                                    <MapPin size={9} />{s.destination}
-                                                </span>
-                                            ) : (
-                                                <span className="text-xs text-gray-200">—</span>
-                                            )}
-                                        </div>
-                                        {/* Date */}
-                                        <div className="hidden sm:flex items-center justify-end gap-1 text-xs text-[#9ca3af] whitespace-nowrap">
-                                            <Calendar size={10} />
-                                            {new Date(s.created_at).toLocaleDateString("en-GB", {
-                                                day: "numeric", month: "short", year: "numeric"
-                                            })}
-                                        </div>
-                                    </div>
-
-                                    {/* Expand icon */}
-                                    <Eye
-                                        size={15}
-                                        className={`flex-shrink-0 transition-colors ${expandedId === s.id ? "text-[#2196C4]" : "text-gray-200"
-                                            }`}
-                                    />
-                                </button>
-
-                                {/* Expanded detail */}
-                                {expandedId === s.id && (
-                                    <div className="border-t border-gray-50 px-5 pb-5 pt-4 bg-[#f9fbfd]">
-                                        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                                            {[
-                                                { label: "Full Name", value: s.name, icon: Users },
-                                                { label: "Email", value: s.email, icon: Mail },
-                                                { label: "Phone", value: s.phone, icon: Phone },
-                                                { label: "Destination", value: s.destination || "Not specified", icon: MapPin },
-                                            ].map(({ label, value, icon: Icon }) => (
-                                                <div key={label}>
-                                                    <p className="text-xs text-[#9ca3af] uppercase tracking-wider mb-1 flex items-center gap-1">
-                                                        <Icon size={9} />{label}
-                                                    </p>
-                                                    <p className="text-sm text-[#1a1a2e] font-medium">{value}</p>
-                                                </div>
-                                            ))}
+                                    {/* Collapsed row */}
+                                    <div className="flex items-center gap-4 px-5 py-4">
+                                        {/* Avatar */}
+                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#2196C4] to-[#1a7da8] flex items-center justify-center flex-shrink-0 text-sm font-bold text-white shadow-sm">
+                                            {s.name?.charAt(0).toUpperCase() ?? "?"}
                                         </div>
 
-                                        <div className="mb-1">
-                                            <p className="text-xs text-[#9ca3af] uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                                                <MessageSquare size={9} />Message
-                                            </p>
-                                            <p className="text-sm text-[#374151] bg-white rounded-sm p-4 border border-gray-100 leading-relaxed min-h-[48px]">
-                                                {s.message || <span className="text-gray-300 italic">No message provided</span>}
-                                            </p>
-                                        </div>
-
-                                        <div className="flex flex-wrap items-center gap-2 mt-4">
-                                            <a
-                                                href={`mailto:${s.email}`}
-                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2196C4] text-white text-xs font-semibold rounded-lg hover:bg-[#1a7da8] transition"
-                                            >
-                                                <Mail size={11} /> Email Student
-                                                <ArrowUpRight size={10} />
-                                            </a>
-                                            <a
-                                                href={`tel:${s.phone}`}
-                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#f5a623] text-white text-xs font-semibold rounded-lg hover:bg-[#e09410] transition"
-                                            >
-                                                <Phone size={11} /> Call
-                                                <ArrowUpRight size={10} />
-                                            </a>
-                                            <span className="ml-auto text-xs text-[#9ca3af] flex items-center gap-1">
-                                                <Clock size={10} />
-                                                {new Date(s.created_at).toLocaleString("en-GB", {
-                                                    day: "numeric", month: "long", year: "numeric",
-                                                    hour: "2-digit", minute: "2-digit"
+                                        {/* Main info — clickable to expand */}
+                                        <button
+                                            onClick={() => setExpandedId(expandedId === s.id ? null : s.id)}
+                                            className="flex-1 min-w-0 grid grid-cols-2 sm:grid-cols-4 gap-x-4 text-left"
+                                        >
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-semibold text-[#1a1a2e] truncate">{s.name}</p>
+                                                <p className="text-xs text-[#9ca3af] flex items-center gap-1 truncate mt-0.5">
+                                                    <Phone size={9} />{s.phone}
+                                                </p>
+                                            </div>
+                                            <div className="hidden sm:flex flex-col justify-center min-w-0">
+                                                <p className="text-xs text-[#6b7280] flex items-center gap-1 truncate">
+                                                    <Mail size={9} />{s.email}
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center">
+                                                {s.destination ? (
+                                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#f5a623]/10 text-[#f5a623] text-xs rounded-full border border-[#f5a623]/20 font-medium whitespace-nowrap">
+                                                        <MapPin size={9} />{s.destination}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-xs text-gray-200">—</span>
+                                                )}
+                                            </div>
+                                            <div className="hidden sm:flex items-center justify-end gap-1 text-xs text-[#9ca3af] whitespace-nowrap">
+                                                <Calendar size={10} />
+                                                {new Date(s.created_at).toLocaleDateString("en-GB", {
+                                                    day: "numeric", month: "short", year: "numeric",
                                                 })}
-                                            </span>
+                                            </div>
+                                        </button>
+
+                                        {/* Right actions */}
+                                        <div className="flex items-center gap-2 flex-shrink-0">
+                                            {/* Delete btn */}
+                                            <button
+                                                onClick={() => setDeleteId(deleteId === s.id ? null : s.id)}
+                                                className={`p-1.5 rounded-sm transition-colors ${deleteId === s.id
+                                                    ? "bg-red-100 text-red-500"
+                                                    : "text-red-400 hover:text-red-500 hover:bg-red-50"
+                                                    }`}
+                                                title="Delete submission"
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                            {/* Expand icon */}
+                                            <button
+                                                onClick={() => setExpandedId(expandedId === s.id ? null : s.id)}
+                                                className={`p-1.5 rounded-sm transition-colors ${expandedId === s.id
+                                                    ? "text-[#2196C4] bg-[#2196C4]/5"
+                                                    : "text-[#2196C4] hover:text-[#2196C4] hover:bg-[#2196C4]/5"
+                                                    }`}
+                                            >
+                                                <Eye size={14} />
+                                            </button>
                                         </div>
                                     </div>
-                                )}
+
+                                    {/* Delete confirmation */}
+                                    {deleteId === s.id && <DeleteConfirmRow s={s} />}
+
+                                    {/* Expanded detail */}
+                                    {expandedId === s.id && deleteId !== s.id && (
+                                        <div className="border-t border-gray-50 px-5 pb-5 pt-4 bg-[#f9fbfd]">
+                                            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                                                {[
+                                                    { label: "Full Name", value: s.name, icon: Users },
+                                                    { label: "Email", value: s.email, icon: Mail },
+                                                    { label: "Phone", value: s.phone, icon: Phone },
+                                                    { label: "Destination", value: s.destination || "Not specified", icon: MapPin },
+                                                ].map(({ label, value, icon: Icon }) => (
+                                                    <div key={label}>
+                                                        <p className="text-xs text-[#9ca3af] uppercase tracking-wider mb-1 flex items-center gap-1">
+                                                            <Icon size={9} />{label}
+                                                        </p>
+                                                        <p className="text-sm text-[#1a1a2e] font-medium">{value}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <div className="mb-1">
+                                                <p className="text-xs text-[#9ca3af] uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                                                    <MessageSquare size={9} />Message
+                                                </p>
+                                                <p className="text-sm text-[#374151] bg-white rounded-sm p-4 border border-gray-100 leading-relaxed min-h-[48px]">
+                                                    {s.message || <span className="text-gray-300 italic">No message provided</span>}
+                                                </p>
+                                            </div>
+
+                                            <div className="flex flex-wrap items-center gap-2 mt-4">
+                                                <a
+                                                    href={`mailto:${s.email}`}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2196C4] text-white text-xs font-semibold rounded-sm hover:bg-[#1a7da8] transition"
+                                                >
+                                                    <Mail size={11} /> Email Student <ArrowUpRight size={10} />
+                                                </a>
+                                                <a
+                                                    href={`tel:${s.phone}`}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#f5a623] text-white text-xs font-semibold rounded-sm hover:bg-[#e09410] transition"
+                                                >
+                                                    <Phone size={11} /> Call <ArrowUpRight size={10} />
+                                                </a>
+                                                <span className="ml-auto text-xs text-[#9ca3af] flex items-center gap-1">
+                                                    <Clock size={10} />
+                                                    {new Date(s.created_at).toLocaleString("en-GB", {
+                                                        day: "numeric", month: "long", year: "numeric",
+                                                        hour: "2-digit", minute: "2-digit",
+                                                    })}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* ── Pagination ── */}
+                        {totalPages > 1 && (
+                            <div className="flex items-center justify-between mt-6 pt-5 border-t border-gray-100">
+                                <p className="text-xs text-[#9ca3af]">
+                                    Page <span className="font-semibold text-[#1a1a2e]">{safePage}</span> of{" "}
+                                    <span className="font-semibold text-[#1a1a2e]">{totalPages}</span>
+                                    <span className="ml-2 text-gray-300">·</span>
+                                    <span className="ml-2">{filtered.length} total</span>
+                                </p>
+
+                                <div className="flex items-center gap-1.5">
+                                    {/* Prev */}
+                                    <button
+                                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                        disabled={safePage === 1}
+                                        className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-white border border-gray-200 rounded-sm text-[#6b7280] hover:border-[#2196C4]/40 hover:text-[#2196C4] transition disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+                                    >
+                                        <ChevronLeft size={13} /> Prev
+                                    </button>
+
+                                    {/* Page numbers */}
+                                    <div className="flex items-center gap-1">
+                                        {Array.from({ length: totalPages }, (_, i) => i + 1)
+                                            .filter(p => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1)
+                                            .reduce<(number | "…")[]>((acc, p, idx, arr) => {
+                                                if (idx > 0 && p - (arr[idx - 1] as number) > 1) acc.push("…");
+                                                acc.push(p);
+                                                return acc;
+                                            }, [])
+                                            .map((p, i) =>
+                                                p === "…" ? (
+                                                    <span key={`ellipsis-${i}`} className="px-1 text-xs text-gray-300">…</span>
+                                                ) : (
+                                                    <button
+                                                        key={p}
+                                                        onClick={() => setCurrentPage(p as number)}
+                                                        className={`w-8 h-8 rounded-sm text-xs font-semibold transition-all ${safePage === p
+                                                            ? "bg-[#2196C4] text-white shadow-sm"
+                                                            : "bg-white border border-gray-200 text-[#6b7280] hover:border-[#2196C4]/40 hover:text-[#2196C4]"
+                                                            }`}
+                                                    >
+                                                        {p}
+                                                    </button>
+                                                )
+                                            )}
+                                    </div>
+
+                                    {/* Next */}
+                                    <button
+                                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                        disabled={safePage === totalPages}
+                                        className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-white border border-gray-200 rounded-sm text-[#6b7280] hover:border-[#2196C4]/40 hover:text-[#2196C4] transition disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+                                    >
+                                        Next <ChevronRight size={13} />
+                                    </button>
+                                </div>
                             </div>
-                        ))}
-                    </div>
+                        )}
+                    </>
                 )}
             </main>
         </div>
