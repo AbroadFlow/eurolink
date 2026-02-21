@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { MapPin, Phone, Mail, Facebook, Instagram, Youtube } from "lucide-react";
+import Link from "next/link";
 
 const footerLinks = {
     destinations: [
@@ -26,13 +27,19 @@ export default function Footer() {
                 <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-10">
                     {/* Brand */}
                     <div className="sm:col-span-2 md:col-span-1">
-                        <Image
-                            src="/eurolink_light.png"
-                            alt="Eurolink Education Consultancy"
-                            width={150}
-                            height={52}
-                            className="h-12 w-auto object-contain mb-4 "
-                        />
+                        {/* logo */}
+                        <Link href="#home" className="flex items-center gap-2 flex-shrink-0">
+                            <div className="h-16 w-[160px] overflow-hidden">
+                                <Image
+                                    src="/logo.jpeg"
+                                    alt="Eurolink Education Consultancy"
+                                    width={160}
+                                    height={92}
+                                    className="h-full w-full object-cover object-center"
+                                    priority
+                                />
+                            </div>
+                        </Link>
                         <p className="text-[#94a3b8] text-sm leading-relaxed mb-5">
                             Your Gateway to European Education
                         </p>
@@ -44,14 +51,14 @@ export default function Footer() {
                             >
                                 <Facebook size={15} />
                             </a>
-                            <a
-                                href="#"
-                                className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#f5a623] flex items-center justify-center transition-colors"
-                                aria-label="Instagram"
-                            >
-                                <Instagram size={15} />
-                            </a>
 
+                            <a
+                                href="https://www.tiktok.com/@eurolinkconsultancy?_r=1&_t=ZS-945FGt4xEmm"
+                                className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#f5a623] flex items-center justify-center transition-colors"
+                                aria-label="TikTok"
+                            >
+                                <img src='/tiktok_outline.svg' alt="TikTok" className="w-[15px] h-[15px]" />
+                            </a>
                         </div>
                     </div>
 
@@ -116,10 +123,10 @@ export default function Footer() {
                             <li className="flex items-start gap-2.5">
                                 <Mail size={14} className="text-[#f5a623] mt-0.5 flex-shrink-0" />
                                 <a
-                                    href="mailto:eurolinkeduconsultancy@gmail.com"
+                                    href="mailto:info@eurolinkeducation.com.np"
                                     className="text-[#94a3b8] text-sm hover:text-white transition-colors break-all"
                                 >
-                                    eurolinkeduconsultancy@gmail.com
+                                    info@eurolinkeducation.com.np
                                 </a>
                             </li>
                         </ul>

@@ -39,8 +39,8 @@ export default function Navbar() {
                             <Phone size={11} />
                             01-5400745
                         </a>
-                        <a href="mailto:eurolinkeduconsultancy@gmail.com" className="hover:text-[#f5a623] transition-colors">
-                            eurolinkeduconsultancy@gmail.com
+                        <a href="mailto:info@eurolinkeducation.com.np" className="hover:text-[#f5a623] transition-colors">
+                            info@eurolinkeducation.com.np
                         </a>
                     </div>
                 </div>
@@ -51,14 +51,16 @@ export default function Navbar() {
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
                     <Link href="#home" className="flex items-center gap-2 flex-shrink-0">
-                        <Image
-                            src="/eurolink_light.png"
-                            alt="Eurolink Education Consultancy"
-                            width={160}
-                            height={56}
-                            className="h-12 w-auto object-contain"
-                            priority
-                        />
+                        <div className="h-16 w-[160px] overflow-hidden">
+                            <Image
+                                src="/logo.jpeg"
+                                alt="Eurolink Education Consultancy"
+                                width={160}
+                                height={92}
+                                className="h-full w-full object-cover object-center"
+                                priority
+                            />
+                        </div>
                     </Link>
 
                     {/* Desktop nav */}
