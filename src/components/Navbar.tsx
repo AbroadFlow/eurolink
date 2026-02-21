@@ -39,8 +39,8 @@ export default function Navbar() {
                             <Phone size={11} />
                             01-5400745
                         </a>
-                        <a href="mailto:eurolinkeduconsultancy@gmail.com" className="hover:text-[#f5a623] transition-colors">
-                            eurolinkeduconsultancy@gmail.com
+                        <a href="mailto:info@eurolinkeducation.com.np" className="hover:text-[#f5a623] transition-colors">
+                            info@eurolinkeducation.com.np
                         </a>
                     </div>
                 </div>
