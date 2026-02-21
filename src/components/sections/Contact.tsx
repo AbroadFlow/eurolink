@@ -24,6 +24,7 @@ export default function Contact() {
         honeypot: "",
     });
     const [error, setError] = useState("");
+    const [submitting, setSubmitting] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -79,6 +80,7 @@ export default function Contact() {
             console.error("Email notification failed", err);
         }
 
+        setSubmitting(false);
         setSubmitted(true);
         setForm({ name: "", phone: "", email: "", destination: "", message: "", honeypot: "" });
     };
@@ -194,8 +196,22 @@ export default function Contact() {
                                     <textarea name="message" rows={4} value={form.message} onChange={handleChange} placeholder="Tell us about your academic background, the program you're interested in, or any questions you have..." className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#2196C4] focus:ring-2 focus:ring-[#2196C4]/10 transition-all resize-none" />
                                 </div>
 
-                                <button type="submit" className="w-full flex items-center justify-center gap-2 py-3 bg-[#f5a623] text-white font-semibold rounded-lg hover:bg-[#e09410] transition-colors">
-                                    <Send size={16} /> Send Enquiry
+                                <button
+                                    type="submit"
+                                    disabled={submitting}
+                                    className="w-full flex items-center justify-center gap-2 py-3 bg-[#f5a623] text-white font-semibold rounded-lg hover:bg-[#e09410] transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                                >
+                                    {submitting ? (
+                                        <>
+                                            <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                                            </svg>
+                                            Sending…
+                                        </>
+                                    ) : (
+                                        <><Send size={16} /> Send Enquiry</>
+                                    )}
                                 </button>
 
                                 <p className="text-xs text-[#9ca3af] text-center">We respect your privacy. Your details will never be shared.</p>
