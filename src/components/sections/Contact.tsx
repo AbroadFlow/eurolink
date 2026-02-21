@@ -2,32 +2,16 @@
 
 import { useState } from "react";
 import { MapPin, Phone, Mail, Send, Clock, CheckCircle } from "lucide-react";
+import { supabase } from "../../lib/supabaseClient";
 
 const contactDetails = [
-    {
-        icon: MapPin,
-        label: "Address",
-        lines: ["Kupondole, Lalitpur", "Nepal, 44700"],
-    },
-    {
-        icon: Phone,
-        label: "Phone",
-        lines: ["01-5400745", "+977 9851401745", "+977 9851422745"],
-    },
-    {
-        icon: Mail,
-        label: "Email",
-        lines: ["eurolinkeduconsultancy@gmail.com"],
-        link: "mailto:eurolinkeduconsultancy@gmail.com",
-    },
-    {
-        icon: Clock,
-        label: "Office Hours",
-        lines: ["Sun to Fri: 9:00 AM to 6:00 PM"],
-    },
+    { icon: MapPin, label: "Address", lines: ["Kupondole, Lalitpur", "Nepal, 44700"] },
+    { icon: Phone, label: "Phone", lines: ["01-5400745", "+977 9851401745", "+977 9851422745"] },
+    { icon: Mail, label: "Email", lines: ["eurolinkeduconsultancy@gmail.com"], link: "mailto:eurolinkeduconsultancy@gmail.com" },
+    { icon: Clock, label: "Office Hours", lines: ["Sun to Fri: 9:00 AM to 6:00 PM"] },
 ];
 
-const destinations = ["Italy", "Georgia", "Malta", "Cyprus", "Netherlands", "Not sure yet"];
+const destinations = ["Italy", "Georgia", "Malta", "Cyprus", "Netherlands", "Austria", "Not sure yet"];
 
 export default function Contact() {
     const [submitted, setSubmitted] = useState(false);
@@ -37,17 +21,66 @@ export default function Contact() {
         email: "",
         destination: "",
         message: "",
+        honeypot: "",
     });
+    const [error, setError] = useState("");
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        setSubmitted(true);
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
     };
 
-    const handleChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-    ) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        setError(""); // Clear previous errors
+
+        // 1. Honeypot spam check
+        if (form.honeypot !== "") return;
+
+        // 2. Required Field Validation
+        if (!form.name || !form.phone || !form.destination) {
+            setError("Name, Phone, and Preferred Destination are required.");
+            return;
+        }
+
+        // 3. Nepalese Phone Validator (Regex)
+        // Supports: Mobile (98/97/96XXXXXXXX) and Landline (01XXXXXXX)
+        const phoneRegex = /^(?:9[678]\d{8}|01\d{7})$/;
+        if (!phoneRegex.test(form.phone.replace(/\s+/g, ""))) {
+            setError("Please enter a valid Nepalese phone number (e.g., 98XXXXXXXX or 01XXXXXXX).");
+            return;
+        }
+
+        // Insert into Supabase
+        const { error: supabaseError } = await supabase.from("contact_submissions").insert([
+            {
+                name: form.name,
+                phone: form.phone,
+                email: form.email,
+                destination: form.destination,
+                message: form.message,
+            },
+        ]);
+
+        if (supabaseError) {
+            console.error(supabaseError);
+            setError("Something went wrong. Please try again.. " + supabaseError.message);
+            return;
+        }
+
+        // Send email notification (using API route /api/send-email)
+        try {
+            await fetch("/api/send-email", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(form),
+            });
+        } catch (err) {
+            console.error("Email notification failed", err);
+        }
+
+        setSubmitted(true);
+        setForm({ name: "", phone: "", email: "", destination: "", message: "", honeypot: "" });
     };
 
     return (
@@ -56,9 +89,7 @@ export default function Contact() {
                 {/* Header */}
                 <div className="text-center mb-14">
                     <span className="text-[#f5a623] text-sm font-semibold uppercase tracking-widest">Get in Touch</span>
-                    <h2 className="text-3xl md:text-4xl font-bold text-[#1a1a2e] mt-2 mb-4">
-                        Contact Us
-                    </h2>
+                    <h2 className="text-3xl md:text-4xl font-bold text-[#1a1a2e] mt-2 mb-4">Contact Us</h2>
                     <p className="text-[#6b7280] max-w-xl mx-auto leading-relaxed">
                         Drop by our office in Kupondole, call us, or fill out the form below.
                         Our counsellors respond within one business day.
@@ -75,29 +106,19 @@ export default function Contact() {
                                     <c.icon size={17} className="text-[#2196C4]" />
                                 </div>
                                 <div>
-                                    <p className="text-xs font-semibold text-[#9ca3af] uppercase tracking-wider mb-1">
-                                        {c.label}
-                                    </p>
+                                    <p className="text-xs font-semibold text-[#9ca3af] uppercase tracking-wider mb-1">{c.label}</p>
                                     {c.lines.map((line) =>
                                         c.link ? (
-                                            <a
-                                                key={line}
-                                                href={c.link}
-                                                className="block text-sm text-[#374151] hover:text-[#2196C4] transition-colors"
-                                            >
-                                                {line}
-                                            </a>
+                                            <a key={line} href={c.link} className="block text-sm text-[#374151] hover:text-[#2196C4] transition-colors">{line}</a>
                                         ) : (
-                                            <p key={line} className="text-sm text-[#374151]">
-                                                {line}
-                                            </p>
+                                            <p key={line} className="text-sm text-[#374151]">{line}</p>
                                         )
                                     )}
                                 </div>
                             </div>
                         ))}
 
-                        {/* Map placeholder */}
+                        {/* Map */}
                         <div className="mt-4 rounded-xl overflow-hidden border border-gray-100 h-44">
                             <iframe
                                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14131.923768579076!2d85.29898965541994!3d27.68698389999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb190038f17727%3A0xa476f49673d209fa!2sEurolink%20Education%20Consultancy!5e0!3m2!1sen!2snp!4v1771567858012!5m2!1sen!2snp"
@@ -118,18 +139,12 @@ export default function Contact() {
                         {submitted ? (
                             <div className="h-full flex flex-col items-center justify-center text-center py-12 px-6 bg-[#f4f8fb] rounded-xl">
                                 <CheckCircle size={48} className="text-[#2196C4] mb-4" />
-                                <h3 className="text-xl font-bold text-[#1a1a2e] mb-2">
-                                    We&apos;ll be in touch!
-                                </h3>
+                                <h3 className="text-xl font-bold text-[#1a1a2e] mb-2">We&apos;ll be in touch!</h3>
                                 <p className="text-[#6b7280] text-sm max-w-xs">
-                                    Thank you for reaching out. A counsellor from Eurolink will contact
-                                    you within one business day.
+                                    Thank you for reaching out. A counsellor from Eurolink will contact you within one business day.
                                 </p>
                                 <button
-                                    onClick={() => {
-                                        setSubmitted(false);
-                                        setForm({ name: "", phone: "", email: "", destination: "", message: "" });
-                                    }}
+                                    onClick={() => { setSubmitted(false); setForm({ name: "", phone: "", email: "", destination: "", message: "", honeypot: "" }); }}
                                     className="mt-6 text-[#2196C4] text-sm font-medium hover:underline"
                                 >
                                     Submit another enquiry
@@ -137,95 +152,53 @@ export default function Contact() {
                             </div>
                         ) : (
                             <form onSubmit={handleSubmit} className="space-y-4">
+                                {error && <p className="text-red-500 text-sm">{error}</p>}
+
+                                {/* Hidden honeypot field */}
+                                <input type="text" name="honeypot" value={form.honeypot} onChange={handleChange} className="hidden" />
+
                                 <div className="grid sm:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-xs font-semibold text-[#374151] mb-1.5 uppercase tracking-wide">
-                                            Full Name *
-                                        </label>
-                                        <input
-                                            type="text"
-                                            name="name"
-                                            required
-                                            value={form.name}
-                                            onChange={handleChange}
-                                            placeholder="Your full name"
-                                            className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#2196C4] focus:ring-2 focus:ring-[#2196C4]/10 transition-all"
-                                        />
+                                        <label className="block text-xs font-semibold text-[#374151] mb-1.5 uppercase tracking-wide">Full Name *</label>
+                                        <input type="text" name="name" required value={form.name} onChange={handleChange} placeholder="Your full name" className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#2196C4] focus:ring-2 focus:ring-[#2196C4]/10 transition-all" />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-semibold text-[#374151] mb-1.5 uppercase tracking-wide">
-                                            Phone Number *
-                                        </label>
-                                        <input
-                                            type="tel"
-                                            name="phone"
-                                            required
-                                            value={form.phone}
-                                            onChange={handleChange}
-                                            placeholder="98XXXXXXXX"
-                                            className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#2196C4] focus:ring-2 focus:ring-[#2196C4]/10 transition-all"
-                                        />
+                                        <label className="block text-xs font-semibold text-[#374151] mb-1.5 uppercase tracking-wide">Phone Number *</label>
+                                        <input type="tel" name="phone" required value={form.phone} onChange={handleChange} placeholder="98XXXXXXXX" className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#2196C4] focus:ring-2 focus:ring-[#2196C4]/10 transition-all" />
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-semibold text-[#374151] mb-1.5 uppercase tracking-wide">
-                                        Email Address
-                                    </label>
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        value={form.email}
-                                        onChange={handleChange}
-                                        placeholder="you@example.com"
-                                        className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#2196C4] focus:ring-2 focus:ring-[#2196C4]/10 transition-all"
-                                    />
+                                    <label className="block text-xs font-semibold text-[#374151] mb-1.5 uppercase tracking-wide">Email Address</label>
+                                    <input type="email" name="email" value={form.email} onChange={handleChange} placeholder="you@example.com" className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#2196C4] focus:ring-2 focus:ring-[#2196C4]/10 transition-all" />
                                 </div>
 
                                 <div>
                                     <label className="block text-xs font-semibold text-[#374151] mb-1.5 uppercase tracking-wide">
-                                        Preferred Destination
+                                        Preferred Destination *
                                     </label>
                                     <select
                                         name="destination"
+                                        required
                                         value={form.destination}
                                         onChange={handleChange}
                                         className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#2196C4] focus:ring-2 focus:ring-[#2196C4]/10 transition-all bg-white text-[#374151]"
                                     >
-                                        <option value="">Select a country</option>
-                                        {destinations.map((d) => (
-                                            <option key={d} value={d}>
-                                                {d}
-                                            </option>
-                                        ))}
+                                        <option value="" disabled>Select a country</option>
+                                        {destinations.map(d => <option key={d} value={d}>{d}</option>)}
                                     </select>
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-semibold text-[#374151] mb-1.5 uppercase tracking-wide">
-                                        Your Message
-                                    </label>
-                                    <textarea
-                                        name="message"
-                                        rows={4}
-                                        value={form.message}
-                                        onChange={handleChange}
-                                        placeholder="Tell us about your academic background, the program you're interested in, or any questions you have..."
-                                        className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#2196C4] focus:ring-2 focus:ring-[#2196C4]/10 transition-all resize-none"
-                                    />
+                                    <label className="block text-xs font-semibold text-[#374151] mb-1.5 uppercase tracking-wide">Your Message</label>
+                                    <textarea name="message" rows={4} value={form.message} onChange={handleChange} placeholder="Tell us about your academic background, the program you're interested in, or any questions you have..." className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#2196C4] focus:ring-2 focus:ring-[#2196C4]/10 transition-all resize-none" />
                                 </div>
 
-                                <button
-                                    type="submit"
-                                    className="w-full flex items-center justify-center gap-2 py-3 bg-[#f5a623] text-white font-semibold rounded-lg hover:bg-[#e09410] transition-colors"
-                                >
-                                    <Send size={16} />
-                                    Send Enquiry
+                                <button type="submit" className="w-full flex items-center justify-center gap-2 py-3 bg-[#f5a623] text-white font-semibold rounded-lg hover:bg-[#e09410] transition-colors">
+                                    <Send size={16} /> Send Enquiry
                                 </button>
 
-                                <p className="text-xs text-[#9ca3af] text-center">
-                                    We respect your privacy. Your details will never be shared.
-                                </p>
+                                <p className="text-xs text-[#9ca3af] text-center">We respect your privacy. Your details will never be shared.</p>
                             </form>
                         )}
                     </div>
